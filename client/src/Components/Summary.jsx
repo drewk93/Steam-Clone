@@ -1,13 +1,36 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { setContexts } from "../Context.jsx"
+import axios from 'axios';
 import Preview from "./Preview.jsx"
-
+import calculateRating from '/src/drewSDC/summary/utils/calculateRating.js'
 
 export default function Summary(){
     const {displayTags,setDisplayTags,selectedPreview,setSelectedPreview,showPreview,setShowPreview,autoplay,previewNavSlider,setpreviewNavSlider} = setContexts()
     let selectorShift = `${selectedPreview*120}px`
 
     useEffect(()=>{setShowPreview(true)},[showPreview])
+
+    const [reviews, setReviews] = useState(null)
+    const [recommended, setRecommended] = useState(null)
+
+
+    
+
+    useEffect(()=>{
+        const domain = `http://localhost:4040`;
+        const fetchReviews = async () => {
+            try {
+                const res = await axios.get(`${domain}/review_summary`);
+                res.data.map((review) => setReviews(review))
+                console.log(reviews)
+                setRecommended(calculateRating(parseInt(reviews.total_recommended), parseInt(reviews.total_not_recommended)))
+            } catch(error){
+                console.error('Error fetching reviews:',error)
+            }
+        }
+        fetchReviews()
+    },[])
+
 
     const toggleTagsModal=()=>{
         displayTags?
@@ -59,6 +82,8 @@ export default function Summary(){
         addEventListener('mousemove',handleMouseMove)
         addEventListener('mouseup',handleMouseUp)
     }
+
+
 
     return(
         <>
@@ -115,8 +140,8 @@ export default function Summary(){
                                         <div className="user_reviews_summary_row" style={{cursor:'pointer'}}>
                                             <div className="subtitle column">Recent Reviews:</div>
                                             <div className="summary column">
-                                                <span className="game_review_summary positive">Very Positive</span>
-                                                <span className="responsive_hidden"> (4,522) </span>
+                                                <span className="game_review_summary positive"></span>
+                                                <span className="responsive_hidden"></span>
                                                 <span className="nonresponsive_hidden store_tooltip">{'- 91% of the 4,566 user reviews in the last 30 days are positive.'}</span>
                                             </div>
                                         </div>
@@ -124,7 +149,7 @@ export default function Summary(){
                                         <div className="user_reviews_summary_row" style={{cursor: 'pointer'}}>
                                             <div className="subtitle column all">All Reviews:</div>
                                             <div className="summary column">
-                                                <span className="game_review_summary positive">Overwhelmingly Positive</span>
+                                                <span className="game_review_summary positive">{recommended.recommendation}</span>
                                                 <span className="responsive_hidden"> (371,189) </span>
                                                 <span className="nonresponsive_hidden store_tooltip">{'- 95% of the 371,230 user reviews for this game are positive.'}</span>
                                             </div>

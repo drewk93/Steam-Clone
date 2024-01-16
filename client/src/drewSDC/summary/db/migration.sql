@@ -11,7 +11,8 @@ CREATE TABLE users (
 );
 
 CREATE TABLE games (
-    game_id SERIAL PRIMARY KEY NOT NULL, 
+    game_id SERIAL PRIMARY KEY NOT NULL,
+    title VARCHAR NOT NULL, // 
     developer VARCHAR NOT NULL,
     publisher VARCHAR NOT NULL,
     release_date DATE
